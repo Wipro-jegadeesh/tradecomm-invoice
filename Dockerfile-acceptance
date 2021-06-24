@@ -1,0 +1,7 @@
+ARG docker_registry=p21d11107559001.azurecr.io/
+FROM ${docker_registry}base/global-bakery/openjdk:11.X.X-alpine311
+
+WORKDIR	/tests
+COPY target/tradecomm-invoice-cucumber-tests.jar ./tests.jar
+
+ENTRYPOINT ["java", "-jar", "tests.jar"]

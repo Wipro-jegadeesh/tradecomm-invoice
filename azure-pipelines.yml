@@ -1,0 +1,35 @@
+# Build pipeline documentation: https://docs.ffdcdev.fusionoperate.io/docs/software_factory/build_pipelines/
+# Pipeline template (with the full list of parameters which can be customized): https://fusionfabric.visualstudio.com/FusionOperate/_git/pipeline_templates?path=%2Ftmpl%2Fcommon%2FbuildStageContent.yml
+
+resources:
+  repositories:
+  - repository: templates
+    type: git
+    name: FusionOperate/pipeline_templates
+    ref: refs/heads/master
+
+# Exclude all short-lived branches which will be handled through the PR branch policy build
+trigger:
+  branches:
+    include:
+    - master
+    - develop
+  paths:
+    exclude:
+    - azure-pipelines-develop.yml
+    - azure-pipelines-master.yml
+
+stages:
+- template: tmpl/fusionfabric/tradecomm/build.yml@templates
+  parameters:
+    chartTemplateName: focorechassis
+    helmTests: false
+    tests:
+      dockerTestImageList:
+        - imageName: $(Build.DefinitionName)-acceptance
+          dockerFile: Dockerfile-acceptance
+#        - imageName: $(Build.DefinitionName)-performance
+#          dockerFile: Dockerfile-performance
+    helmTestsParameters: |
+      --set tests.acceptance.tags='not @example'
+    buildMavenCodeCoverageClassFilter: '-:com.trmsys.tradecomminvoice.openapi.*'

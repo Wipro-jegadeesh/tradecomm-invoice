@@ -1,0 +1,35 @@
+# Deployment pipeline documentation: https://docs.ffdcdev.fusionoperate.io/docs/software_factory/deployment_pipelines/
+
+resources:
+  repositories:
+  - repository: templates
+    type: git
+    name: FusionOperate/pipeline_templates
+    ref: refs/heads/master
+  pipelines:
+  - pipeline: Build  # This name is referenced in the templates, don't change it
+    source: tradecomm-invoice  # source pipeline definition name
+    branch: master  # branch to pick the artifact, optional; defaults to all branches
+    # version: $(BuildNumber) # pipeline run number to pick artifact; optional; defaults to last successfully completed run
+    trigger:     # Optional; Triggers are not enabled by default.
+      branches:
+        include:  # branches to consider the trigger events, optional; defaults to all branches.
+        - master
+
+trigger: none
+
+stages:
+- template: tmpl/fusionfabric/tradecomm/release-master.yml@templates
+  parameters:
+    additionalVariables:
+      __default__:
+        HelmEnvSpecificParams:
+        HelmTestParams: |
+          --set tests.acceptance.tags='not @example'
+        # WARNING: Set ingresses.global.enabled=true in the__default__ section only after the traffic manager has been configured appropriately
+        HelmInstallParams: |
+          --set ingresses.global.enabled=false
+          $(HelmEnvSpecificParams)
+      PreProd:
+        HelmEnvSpecificParams: |
+          --set ingresses.global.enabled=false
