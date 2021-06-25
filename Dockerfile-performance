@@ -1,5 +1,0 @@
-ARG docker_registry=p21d11107559001.azurecr.io/
-FROM ${docker_registry}3rdparty/taurus:1.14.2
-
-COPY target/tradecomm-invoice-perf-tests.jar /bzt-configs/tests.jar
-COPY src/test/resources/taurus/* /bzt-configs/
